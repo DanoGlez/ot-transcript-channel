@@ -1,0 +1,25 @@
+{
+    "name": "Transcript Channel",
+    "id": "ot-transcript-channel",
+    "version": "1.0.0",
+    "startFile": "index.ts",
+    "enabled": true,
+    "priority": 0,
+    "events": [],
+    "npmDependencies": [],
+    "requiredPlugins": [],
+    "incompatiblePlugins": [],
+    "details": {
+        "author": "FamilyRP",
+        "shortDescription": "Send transcripts to specific channels per ticket option.",
+        "longDescription": "Allows configuring a custom transcript channel for each ticket option. When a ticket is deleted, the transcript will be sent to the channel specified by the transcriptId field in options.json.",
+        "imageUrl": "",
+        "projectUrl": "",
+        "tags": [
+            "transcript",
+            "logs",
+            "channel",
+            "per-option"
+        ]
+    }
+}
