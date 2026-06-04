@@ -1,46 +1,20 @@
 import {api, opendiscord, utilities} from "#opendiscord"
 import * as discord from "discord.js"
-import * as fs from "fs"
-import * as path from "path"
 
-if (utilities.project != "openticket") throw new api.ODPluginError("This plugin only works in Open Ticket!")
+if (opendiscord.project != "openticket") throw new api.ODPluginError("This plugin only works in Open Ticket!")
 
-// Tipos para la configuración de opciones
-interface OptionConfig {
-    id: string
-    transcriptId?: string
-    [key: string]: unknown
-}
-
-// Cache de la configuración
-let optionsCache: OptionConfig[] | null = null
-let lastCacheTime = 0
-const CACHE_TTL = 60000
-
-// Cargar la configuración de options.json
-const getOptionsConfig = (): OptionConfig[] => {
-    const now = Date.now()
-    if (optionsCache && (now - lastCacheTime) < CACHE_TTL) {
-        return optionsCache
-    }
-    
-    try {
-        const optionsPath = path.join(process.cwd(), "config", "options.json")
-        const rawData = fs.readFileSync(optionsPath, "utf8")
-        optionsCache = JSON.parse(rawData) as OptionConfig[]
-        lastCacheTime = now
-        return optionsCache
-    } catch (err) {
-        opendiscord.log("ot-transcript-channel: Error loading options.json", "error")
-        return []
+declare module "#opendiscord-types" {
+    export interface ODPluginManagerIdMappings {
+        "ot-transcript-channel":api.ODPlugin
     }
 }
 
-// Obtener el transcriptId para una opción específica
 const getTranscriptChannelId = (optionId: string): string | null => {
-    const options = getOptionsConfig()
-    const option = options.find(opt => opt.id === optionId)
-    return option?.transcriptId ?? null
+    const optionsConfig = opendiscord.configs.get("opendiscord:options")!
+    const option = optionsConfig.data.find(opt => opt.id === optionId)
+    if (!option || option.type !== "ticket") return null
+    const transcriptId = (option as api.ODOptionsJsonConfig_TicketOption & {transcriptId?: string}).transcriptId
+    return transcriptId && transcriptId.length > 0 ? transcriptId : null
 }
 
 // Inyectar worker adicional en la action de transcript
@@ -73,8 +47,8 @@ opendiscord.events.get("afterActionsLoaded").listen(async (actions) => {
         
         try {
             // Obtener configuraciones igual que el sistema original
-            const transcriptConfig = opendiscord.configs.get("opendiscord:transcripts")
-            const generalConfig = opendiscord.configs.get("opendiscord:general")
+            const transcriptConfig = opendiscord.configs.get("opendiscord:transcripts")!
+            const generalConfig = opendiscord.configs.get("opendiscord:general")!
             const lang = opendiscord.languages
             const mode = transcriptConfig.data.general.mode
             

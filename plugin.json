@@ -3,6 +3,7 @@
     "id": "ot-transcript-channel",
     "version": "1.0.0",
     "startFile": "index.ts",
+    "supportedVersions":["OTv4.2.x"],
     "enabled": true,
     "priority": 0,
     "events": [],
